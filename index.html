@@ -246,12 +246,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 4px;
             min-width: 20px;
-            height: 20px;
-            padding: 0 6px;
+            height: 22px;
+            padding: 0 8px;
             background: #f97316;
             color: white;
-            border-radius: 10px;
+            border-radius: 11px;
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
@@ -262,8 +263,13 @@
 
         .finding-indicator:hover {
             background: #ea580c;
-            transform: scale(1.1);
+            transform: scale(1.05);
             z-index: 10001;
+        }
+
+        .robot-icon {
+            font-size: 12px;
+            line-height: 1;
         }
 
         /* Popover Styles */
@@ -421,6 +427,8 @@
             border-radius: 6px;
             margin-bottom: 8px;
             background: white;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .finding-item:hover {
@@ -480,6 +488,329 @@
 
         .checkmark {
             color: #10b981;
+        }
+
+        /* Drawer Styles */
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 20000;
+        }
+
+        .drawer-overlay.active {
+            display: block;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 20001;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .drawer.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+        }
+
+        .drawer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .drawer-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .drawer-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #9ca3af;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .drawer-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .drawer-section {
+            margin-bottom: 24px;
+        }
+
+        .drawer-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .finding-detail {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .finding-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .finding-detail-agent {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .finding-detail-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #c2410c;
+        }
+
+        .finding-detail-description {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .suggestion-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .suggestion-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #065f46;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggestion-text {
+            color: #047857;
+            font-size: 13px;
+            line-height: 1.6;
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #d1fae5;
+        }
+
+        .drawer-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .drawer-footer.editing {
+            justify-content: space-between;
+        }
+
+        .btn-drawer {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-dismiss {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+
+        .btn-dismiss:hover {
+            background: #f9fafb;
+        }
+
+        .btn-review {
+            background: #2563eb;
+            border: 1px solid #2563eb;
+            color: white;
+        }
+
+        .btn-review:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-save {
+            background: #2563eb;
+            border: 1px solid #2563eb;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #1d4ed8;
+        }
+
+        /* Edit Form Styles */
+        .edit-form {
+            display: none;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .field-section {
+            margin-bottom: 20px;
+        }
+
+        .field-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .field-checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        .field-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .field-value {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .value-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .value-text {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .changes-section {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .changes-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #92400e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .changes-text {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .text-removed {
+            color: #dc2626;
+            text-decoration: line-through;
+            background: #fee2e2;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .text-added {
+            color: #059669;
+            background: #d1fae5;
+            padding: 2px 4px;
+            border-radius: 2px;
         }
     </style>
 </head>
@@ -551,6 +882,7 @@
                             <div class="item-title">
                                 <a href="#">Update Login page to have a blue background</a>
                                 <span class="finding-indicator">
+                                    <span class="robot-icon">🤖</span>
                                     1
                                     <div class="findings-popover">
                                         <div class="popover-header">
@@ -561,7 +893,7 @@
                                             <div class="popover-subtitle">ID-28 - Update Login page to have a blue background</div>
                                         </div>
                                         <div class="popover-body">
-                                            <div class="finding-item">
+                                            <div class="finding-item" onclick="openDrawer('ID-28-0')">
                                                 <div class="finding-header">
                                                     <div class="agent-name">Change Request Affected Items Agent</div>
                                                     <div class="finding-type">
@@ -599,6 +931,7 @@
                             <div class="item-title">
                                 <a href="#">Login Page</a>
                                 <span class="finding-indicator">
+                                    <span class="robot-icon">🤖</span>
                                     2
                                     <div class="findings-popover">
                                         <div class="popover-header">
@@ -609,7 +942,7 @@
                                             <div class="popover-subtitle">ID-27 - Login Page</div>
                                         </div>
                                         <div class="popover-body">
-                                            <div class="finding-item">
+                                            <div class="finding-item" onclick="openDrawer('ID-27-0')">
                                                 <div class="finding-header">
                                                     <div class="agent-name">Requirement Conflict Detection</div>
                                                     <div class="finding-type">
@@ -621,7 +954,7 @@
                                                     This requirement lacks upstream traceability to user needs or system requirements. Without clear traceability, it is difficult to verify that this requirement aligns with the intended system functionality and user expectations.
                                                 </div>
                                             </div>
-                                            <div class="finding-item">
+                                            <div class="finding-item" onclick="openDrawer('ID-27-1')">
                                                 <div class="finding-header">
                                                     <div class="agent-name">Change Request Affected Items Agent</div>
                                                     <div class="finding-type">
@@ -832,5 +1165,241 @@
             </table>
         </div>
     </div>
+
+    <!-- Drawer for Finding Details -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="findingDrawer">
+        <div class="drawer-header">
+            <div>
+                <div class="drawer-title" id="drawerTitle">Finding Details</div>
+                <div class="drawer-subtitle" id="drawerSubtitle"></div>
+            </div>
+            <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+        </div>
+        <div class="drawer-body" id="drawerBody">
+            <!-- Finding view -->
+            <div id="findingView">
+                <!-- Content will be inserted here -->
+            </div>
+            <!-- Edit form view -->
+            <div id="editForm" class="edit-form">
+                <!-- Edit form will be inserted here -->
+            </div>
+        </div>
+        <div class="drawer-footer" id="drawerFooter">
+            <button class="btn-drawer btn-dismiss" onclick="closeDrawer()">Dismiss</button>
+            <button class="btn-drawer btn-review" onclick="showEditForm()">Review Suggestion</button>
+        </div>
+    </div>
+
+    <script>
+        // Finding data with suggestions
+        const findingsData = {
+            'ID-28-0': {
+                itemId: 'ID-28',
+                itemTitle: 'Update Login page to have a blue background',
+                agent: 'Change Request Affected Items Agent',
+                type: 'Insufficient Description',
+                description: 'The Change Request specifies updating the login page background to blue with the foreground remaining white. However, the affected Requirement still states the background should be green. This discrepancy indicates that the Requirement does not currently reflect the Change Request\'s intent, which can lead to confusion and misimplementation.',
+                suggestion: 'Edit all relevant fields of ID-27 to update the description from "The login page of the application shall have a green background." to "The login page of the application shall have a blue background. The foreground will remain white."',
+                editField: 'Description',
+                originalValue: 'The login page of the application shall have a green background.',
+                newValue: 'The login page of the application shall have a blue background. The foreground will remain white.',
+                changesText: 'The login page of the application shall have a <span class="text-removed">green</span><span class="text-added">blue</span> background. <span class="text-added">The foreground will remain white.</span>'
+            },
+            'ID-27-0': {
+                itemId: 'ID-27',
+                itemTitle: 'Login Page',
+                agent: 'Requirement Conflict Detection',
+                type: 'Missing Traceability',
+                description: 'This requirement lacks upstream traceability to user needs or system requirements. Without clear traceability, it is difficult to verify that this requirement aligns with the intended system functionality and user expectations.',
+                suggestion: 'Add traceability links from this requirement to the parent user story or system requirement that defines the need for the login page functionality.',
+                editField: 'Traceability',
+                originalValue: '(No upstream traceability)',
+                newValue: 'Add links to: User Story #42 - User Authentication',
+                changesText: '<span class="text-added">Add links to: User Story #42 - User Authentication</span>'
+            },
+            'ID-27-1': {
+                itemId: 'ID-27',
+                itemTitle: 'Login Page',
+                agent: 'Change Request Affected Items Agent',
+                type: 'Inaccurate Description',
+                description: 'The requirement description conflicts with the change request affecting it. The change request specifies a blue background, but this requirement still references the original green background specification.',
+                suggestion: 'Update the requirement description to reflect the change request: "The login page of the application shall have a blue background. The foreground will remain white." Context for edits: This change is necessary to ensure the Requirement accurately reflects the Change Request\'s intent and maintains consistency in system documentation and traceability.',
+                editField: 'Description',
+                originalValue: 'The login page of the application shall have a green background.',
+                newValue: 'The login page of the application shall have a blue background. The foreground will remain white.',
+                changesText: 'The login page of the application shall have a <span class="text-removed">green</span><span class="text-added">blue</span> background. <span class="text-added">The foreground will remain white.</span>'
+            }
+        };
+
+        let currentFindingKey = null;
+
+        function openDrawer(findingKey) {
+            const finding = findingsData[findingKey];
+            if (!finding) return;
+
+            currentFindingKey = findingKey;
+
+            const drawer = document.getElementById('findingDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const title = document.getElementById('drawerTitle');
+            const subtitle = document.getElementById('drawerSubtitle');
+            const findingView = document.getElementById('findingView');
+            const editForm = document.getElementById('editForm');
+
+            title.textContent = 'Finding Details';
+            subtitle.textContent = `${finding.itemId} - ${finding.itemTitle}`;
+
+            findingView.innerHTML = `
+                <div class="drawer-section">
+                    <div class="drawer-section-title">Finding</div>
+                    <div class="finding-detail">
+                        <div class="finding-detail-header">
+                            <div class="finding-detail-agent">${finding.agent}</div>
+                            <div class="finding-detail-type">
+                                <span class="warning-icon">⚠</span>
+                                ${finding.type}
+                            </div>
+                        </div>
+                        <div class="finding-detail-description">
+                            ${finding.description}
+                        </div>
+                    </div>
+                </div>
+                <div class="drawer-section">
+                    <div class="drawer-section-title">Recommendation</div>
+                    <div class="suggestion-box">
+                        <div class="suggestion-header">
+                            💡 Suggested Change
+                        </div>
+                        <div class="suggestion-text">
+                            ${finding.suggestion}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show finding view, hide edit form
+            findingView.style.display = 'block';
+            editForm.classList.remove('active');
+
+            // Reset footer
+            const footer = document.getElementById('drawerFooter');
+            footer.classList.remove('editing');
+            footer.innerHTML = `
+                <button class="btn-drawer btn-dismiss" onclick="closeDrawer()">Dismiss</button>
+                <button class="btn-drawer btn-review" onclick="showEditForm()">Review Suggestion</button>
+            `;
+
+            drawer.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function showEditForm() {
+            const finding = findingsData[currentFindingKey];
+            if (!finding) return;
+
+            const title = document.getElementById('drawerTitle');
+            const findingView = document.getElementById('findingView');
+            const editForm = document.getElementById('editForm');
+            const footer = document.getElementById('drawerFooter');
+
+            title.textContent = 'Edit Item';
+
+            editForm.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Item</label>
+                    <select class="form-select">
+                        <option>Requirement - ${finding.itemId} - ${finding.itemTitle}</option>
+                    </select>
+                </div>
+
+                <div class="field-section">
+                    <div class="field-header">
+                        <input type="checkbox" class="field-checkbox" checked disabled>
+                        <div class="field-name">${finding.editField}</div>
+                    </div>
+                    
+                    <div class="field-value">
+                        <div class="value-label">Original value</div>
+                        <div class="value-text">${finding.originalValue}</div>
+                    </div>
+
+                    <div class="field-value">
+                        <div class="value-label">New value</div>
+                        <div class="value-text">${finding.newValue}</div>
+                    </div>
+
+                    <div class="changes-section">
+                        <div class="changes-label">Changes</div>
+                        <div class="changes-text">${finding.changesText}</div>
+                    </div>
+                </div>
+            `;
+
+            // Hide finding view, show edit form
+            findingView.style.display = 'none';
+            editForm.classList.add('active');
+
+            // Update footer
+            footer.classList.add('editing');
+            footer.innerHTML = `
+                <button class="btn-drawer btn-dismiss" onclick="backToFinding()">Cancel</button>
+                <button class="btn-drawer btn-save" onclick="saveChanges()">Save changes</button>
+            `;
+        }
+
+        function backToFinding() {
+            if (currentFindingKey) {
+                openDrawer(currentFindingKey);
+            }
+        }
+
+        function saveChanges() {
+            alert('Changes saved successfully!');
+            closeDrawer();
+        }
+
+        function closeDrawer() {
+            const drawer = document.getElementById('findingDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.remove('active');
+            overlay.classList.remove('active');
+            currentFindingKey = null;
+        }
+
+        // Close drawer when clicking overlay
+        document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+        // Handle popover hover behavior
+        document.querySelectorAll('.finding-indicator').forEach(indicator => {
+            const popover = indicator.querySelector('.findings-popover');
+            let hideTimeout;
+
+            const showPopover = () => {
+                clearTimeout(hideTimeout);
+                popover.classList.add('active');
+            };
+
+            const hidePopover = () => {
+                hideTimeout = setTimeout(() => {
+                    popover.classList.remove('active');
+                }, 100);
+            };
+
+            // Show on badge hover
+            indicator.addEventListener('mouseenter', showPopover);
+            
+            // Delay hide when leaving badge
+            indicator.addEventListener('mouseleave', hidePopover);
+            
+            // Keep open when hovering popover
+            popover.addEventListener('mouseenter', showPopover);
+            
+            // Hide when leaving popover
+            popover.addEventListener('mouseleave', hidePopover);
+        });
+    </script>
 </body>
 </html>
