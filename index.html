@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ketryx - All Items with Agent Findings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #172b4d;
+            font-size: 14px;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 18px;
+            color: #2c5282;
+        }
+
+        .breadcrumb {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .main-content {
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #172b4d;
+        }
+
+        .toolbar {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toolbar-label {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        select, input {
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+        }
+
+        input[type="search"] {
+            width: 280px;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            position: relative;
+            z-index: 1;
+        }
+
+        th {
+            background: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid #e1e4e8;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            position: relative;
+        }
+
+        tr {
+            position: relative;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .item-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: static;
+        }
+
+        .item-title a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .item-title a:hover {
+            text-decoration: underline;
+        }
+
+        .item-id {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .item-id:hover {
+            text-decoration: underline;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 28px;
+        }
+
+        .type-cr { background: #fed7aa; color: #7c2d12; }
+        .type-rq { background: #bfdbfe; color: #1e3a8a; }
+        .type-sw { background: #bbf7d0; color: #14532d; }
+        .type-tc { background: #e9d5ff; color: #581c87; }
+        .type-risk { background: #fecaca; color: #7f1d1d; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-open {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .status-reopened {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-closed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .approval-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-dot.approved {
+            background: #10b981;
+        }
+
+        .status-dot.not-approved {
+            background: #ef4444;
+        }
+
+        /* Agent Finding Indicator Styles */
+        .finding-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: #f97316;
+            color: white;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .finding-indicator:hover {
+            background: #ea580c;
+            transform: scale(1.1);
+            z-index: 10001;
+        }
+
+        /* Popover Styles */
+        .findings-popover {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 480px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 10001;
+            border: 1px solid #d1d5db;
+        }
+
+        .findings-popover.active {
+            display: block;
+        }
+
+        /* Invisible bridge between badge and popover to prevent closing when moving mouse */
+        .findings-popover::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            height: 8px;
+        }
+
+        .findings-popover::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 24px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+            filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.05));
+        }
+
+        .popover-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .popover-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .popover-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .popover-body {
+            padding: 12px;
+        }
+
+
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #9ca3af;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+        }
+
+        .finding-item {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: white;
+        }
+
+        .finding-item:hover {
+            border-color: #f97316;
+            background: #fff7ed;
+        }
+
+        .finding-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 6px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 13px;
+        }
+
+        .finding-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #c2410c;
+            white-space: nowrap;
+        }
+
+        .finding-description {
+            color: #4b5563;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .warning-icon {
+            color: #f97316;
+        }
+
+        .info-icon {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .task-icon {
+            color: #6b7280;
+        }
+
+        .checkmark {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🔷 Ketryx</div>
+        <div class="breadcrumb">Agent Filters Demo › Insulin Delivery</div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">All items</h1>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <span class="toolbar-label">Version</span>
+                <select>
+                    <option>1.0.1</option>
+                </select>
+            </div>
+            <div class="toolbar-group">
+                <span class="toolbar-label">Compare to version</span>
+                <select>
+                    <option>Previous (1.0.0 release)</option>
+                </select>
+            </div>
+            <div class="toolbar-group">
+                <span class="toolbar-label">Filter</span>
+                <select>
+                    <option>All 24 items</option>
+                </select>
+            </div>
+            <div class="toolbar-group">
+                <span class="toolbar-label">Search</span>
+                <input type="search" placeholder="Search items...">
+            </div>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+                <button class="btn btn-primary">+ Create item</button>
+                <button class="btn">🔄 Synchronize project</button>
+                <button class="btn">⋯</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox">
+                        </th>
+                        <th style="width: 50px;">Diff</th>
+                        <th style="width: 320px;">Title</th>
+                        <th style="width: 100px;">Source</th>
+                        <th style="width: 80px;">Type</th>
+                        <th style="width: 140px;">Owner</th>
+                        <th style="width: 80px;">Tasks</th>
+                        <th style="width: 80px;">Tests</th>
+                        <th style="width: 140px;">Approval state</th>
+                        <th style="width: 120px;">Your approval</th>
+                        <th style="width: 100px;">State</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><span style="color: #f59e0b;">≫</span></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Update Login page to have a blue background</a>
+                                <span class="finding-indicator">
+                                    1
+                                    <div class="findings-popover">
+                                        <div class="popover-header">
+                                            <div class="popover-title">
+                                                <span class="warning-icon">⚠️</span>
+                                                Agent Findings
+                                            </div>
+                                            <div class="popover-subtitle">ID-28 - Update Login page to have a blue background</div>
+                                        </div>
+                                        <div class="popover-body">
+                                            <div class="finding-item">
+                                                <div class="finding-header">
+                                                    <div class="agent-name">Change Request Affected Items Agent</div>
+                                                    <div class="finding-type">
+                                                        <span class="warning-icon">⚠</span>
+                                                        Insufficient Description
+                                                    </div>
+                                                </div>
+                                                <div class="finding-description">
+                                                    The Change Request specifies updating the login page background to blue with the foreground remaining white. However, the affected Requirement still states the background should be green. This discrepancy indicates that the Requirement does not currently reflect the Change Request's intent, which can lead to confusion and misimplementation.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-28</a></td>
+                        <td><span class="type-badge type-cr">CR</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot not-approved"></span>
+                                Not approved
+                            </div>
+                        </td>
+                        <td></td>
+                        <td><span class="status-badge status-open">Open</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><span style="color: #f59e0b;">≫</span></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Login Page</a>
+                                <span class="finding-indicator">
+                                    2
+                                    <div class="findings-popover">
+                                        <div class="popover-header">
+                                            <div class="popover-title">
+                                                <span class="warning-icon">⚠️</span>
+                                                Agent Findings
+                                            </div>
+                                            <div class="popover-subtitle">ID-27 - Login Page</div>
+                                        </div>
+                                        <div class="popover-body">
+                                            <div class="finding-item">
+                                                <div class="finding-header">
+                                                    <div class="agent-name">Requirement Conflict Detection</div>
+                                                    <div class="finding-type">
+                                                        <span class="warning-icon">⚠</span>
+                                                        Missing Traceability
+                                                    </div>
+                                                </div>
+                                                <div class="finding-description">
+                                                    This requirement lacks upstream traceability to user needs or system requirements. Without clear traceability, it is difficult to verify that this requirement aligns with the intended system functionality and user expectations.
+                                                </div>
+                                            </div>
+                                            <div class="finding-item">
+                                                <div class="finding-header">
+                                                    <div class="agent-name">Change Request Affected Items Agent</div>
+                                                    <div class="finding-type">
+                                                        <span class="warning-icon">⚠</span>
+                                                        Inaccurate Description
+                                                    </div>
+                                                </div>
+                                                <div class="finding-description">
+                                                    The requirement description conflicts with the change request affecting it. The change request specifies a blue background, but this requirement still references the original green background specification.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-27</a></td>
+                        <td><span class="type-badge type-rq">RQ</span></td>
+                        <td>Serge Versille</td>
+                        <td><span class="task-icon">👤 1</span></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot not-approved"></span>
+                                Not approved
+                            </div>
+                        </td>
+                        <td></td>
+                        <td><span class="status-badge status-reopened">Reopened</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">iOS Client (Patient app)</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-9</a></td>
+                        <td><span class="type-badge type-sw">SW</span> <span class="type-badge type-cr">RC</span></td>
+                        <td>Serge Versille</td>
+                        <td><span class="task-icon">👤 1</span></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td></td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Test sensor API connection</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-6</a></td>
+                        <td><span class="type-badge type-tc">TC</span></td>
+                        <td>Serge Versille</td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Adjusting for Exercise</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-5</a></td>
+                        <td><span class="type-badge type-rq">RQ</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Usability</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-8</a></td>
+                        <td><span class="type-badge type-rq">RQ</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td><span class="task-icon">👤 1</span></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">SaMD Server</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-14</a></td>
+                        <td><span class="type-badge type-sw">SW</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td><span class="task-icon">👤 1</span></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Daily Insulin Dose Calculation</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-7</a></td>
+                        <td><span class="type-badge type-rq">RQ</span> <span class="type-badge type-cr">RC</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Database</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-15</a></td>
+                        <td><span class="type-badge type-sw">SW</span> <span class="type-badge type-cr">RC</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td><span class="task-icon">👤 1</span></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td></td>
+                        <td>
+                            <div class="item-title">
+                                <a href="#">Unauthorized Access</a>
+                            </div>
+                        </td>
+                        <td><a href="#" class="item-id">🔷 ID-20</a></td>
+                        <td><span class="type-badge type-risk">RISK</span></td>
+                        <td>Carlton O'Neal</td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="approval-status">
+                                <span class="status-dot approved"></span>
+                                Approved
+                            </div>
+                        </td>
+                        <td>Approved</td>
+                        <td><span class="status-badge status-closed">Closed <span class="checkmark">✓</span></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
