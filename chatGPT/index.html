@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+  <title>Ketryx · All items — Hover/Click Popover + Drawer (Failsafe)</title>
+  <script src='https://cdn.tailwindcss.com'></script>
+  <style>
+    .elev-1 { box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.02); }
+    .elev-2 { box-shadow: 0 12px 32px rgba(16,24,40,0.14), 0 4px 12px rgba(16,24,40,0.08); }
+    .badge { transition: transform 120ms ease, box-shadow 120ms ease; cursor: pointer; }
+    .badge:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(191, 90, 0, 0.18); }
+    .robot { width: 14px; height: 14px; border-radius: 9999px; background: #0ea5e9; color: white; display:inline-flex; align-items:center; justify-content:center; font-size:10px; line-height:10px; }
+    table, thead, tbody, tr, td, th { overflow: visible; }
+    /* Popover */
+    #popover { position: fixed; z-index: 999999; display: none; pointer-events: auto; }
+    #popover.visible { display: block; }
+    #popover .arrow { position: absolute; top: -8px; width: 16px; height: 16px; background: white; border-left: 1px solid rgb(229,231,235); border-top: 1px solid rgb(229,231,235); transform: rotate(45deg); border-top-left-radius: 4px; }
+    /* Drawer */
+    .drawer { position: fixed; top: 0; right: -640px; width: 640px; height: 100vh; background: #fff; z-index: 999900; transition: right 180ms ease; box-shadow: -12px 0 32px rgba(16,24,40,0.14), -4px 0 12px rgba(16,24,40,0.08); }
+    .drawer.open { right: 0; }
+    .backdrop { position: fixed; inset: 0; background: rgba(2,6,23,0.35); z-index: 999890; display: none; }
+    .backdrop.open { display: block; }
+  </style>
+</head>
+<body class='bg-gray-50 text-slate-800'>
+  <div class='min-h-screen flex'>
+    <!-- Sidebar -->
+    <aside class='w-64 bg-white border-r border-gray-200 hidden md:flex md:flex-col'>
+      <div class='h-14 flex items-center px-4 border-b border-gray-200'>
+        <div class='flex items-center gap-2'>
+          <span class='inline-flex h-6 w-6 items-center justify-center rounded bg-emerald-600 text-white text-xs font-semibold'>Kx</span>
+          <span class='font-semibold'>Ketryx</span>
+          <span class='ml-2 inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded'>Demo</span>
+        </div>
+      </div>
+      <nav class='p-3 space-y-1 text-sm'>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Back to projects</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded bg-emerald-50 text-emerald-700' href='#'>All items</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Releases</a>
+        <div class='mt-2 text-xs uppercase tracking-wide text-gray-400 px-3'>Design</div>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Traceability</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Graph</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Risks</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Risk controls</a>
+        <div class='mt-2 text-xs uppercase tracking-wide text-gray-400 px-3'>Verification & Validation</div>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Tests</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>History</a>
+        <div class='mt-2 text-xs uppercase tracking-wide text-gray-400 px-3'>Configuration</div>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>SBOM</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Documents</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Agents</a>
+        <a class='flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50' href='#'>Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class='flex-1 flex flex-col'>
+      <header class='h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4'>
+        <div class='flex items-center gap-2 text-sm'>
+          <span class='text-gray-500'>Agent Filters Demo</span>
+          <span class='text-gray-300'>/</span>
+          <span class='font-medium'>Insulin Delivery</span>
+        </div>
+        <div class='flex items-center gap-2'>
+          <button class='text-sm px-3 py-1.5 rounded border border-gray-200 hover:bg-gray-50'>Help</button>
+          <button class='text-sm px-3 py-1.5 rounded bg-emerald-600 text-white'>Save</button>
+        </div>
+      </header>
+
+      <section class='p-4'>
+        <div class='bg-white border border-gray-200 rounded-lg elev-1'>
+          <!-- Toolbar -->
+          <div class='px-4 py-3 flex flex-wrap items-center gap-2 border-b border-gray-200'>
+            <h1 class='text-base font-semibold mr-auto'>All items</h1>
+            <div class='flex items-center gap-2 text-sm'>
+              <label class='text-gray-500'>Version</label>
+              <select class='rounded border-gray-300 text-sm'><option>1.0.1</option></select>
+              <label class='ml-3 text-gray-500'>Compare to</label>
+              <select class='rounded border-gray-300 text-sm'><option>Previous (1.0.0 release)</option></select>
+              <span class='ml-3 inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 px-2 py-1 text-xs border border-amber-200'>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' class='w-3.5 h-3.5'><path d='M9 2a1 1 0 0 1 .894.553l7 14A1 1 0 0 1 16 18H4a1 1 0 0 1-.894-1.447l7-14A1 1 0 0 1 9 2Zm1 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-1-7v5h2V7h-2Z'/></svg>
+                Agent findings
+              </span>
+              <div class='flex items-center gap-2 ml-3'>
+                <button class='text-sm px-2.5 py-1.5 rounded border border-gray-200 hover:bg-gray-50'>Create item</button>
+                <button class='text-sm px-2.5 py-1.5 rounded border border-gray-200 hover:bg-gray-50'>Synchronize project</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class='overflow-x-auto'>
+            <table class='min-w-full text-sm'>
+              <thead class='bg-gray-50 text-gray-600 border-b'>
+                <tr>
+                  <th class='w-10 px-4 py-2 text-left'>Diff</th>
+                  <th class='px-4 py-2 text-left'>Title</th>
+                  <th class='px-4 py-2 text-left'>Source</th>
+                  <th class='px-4 py-2 text-left'>Type</th>
+                  <th class='px-4 py-2 text-left'>Owner</th>
+                  <th class='px-4 py-2 text-left'>Tests</th>
+                  <th class='px-4 py-2 text-left'>Approval state</th>
+                  <th class='px-4 py-2 text-left'>Your approval</th>
+                  <th class='px-4 py-2 text-left'>State</th>
+                  <th class='px-4 py-2 text-right w-40'>Findings</th>
+                </tr>
+              </thead>
+              <tbody class='divide-y'>
+
+                <!-- Row 1 -->
+                <tr class='bg-white hover:bg-gray-50'>
+                  <td class='px-4 py-3 text-gray-400'>»»</td>
+                  <td class='px-4 py-3'><a href='#' class='font-medium text-emerald-700 hover:underline item-title'>Update Login page to have a blue background</a></td>
+                  <td class='px-4 py-3 text-gray-600'>ID-28</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 rounded bg-orange-50 text-orange-700 px-2 py-0.5 text-xs border border-orange-200'>CR</span></td>
+                  <td class='px-4 py-3'>Carlton O'Neal</td>
+                  <td class='px-4 py-3'>—</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 text-red-600'>●</span> Not approved</td>
+                  <td class='px-4 py-3'>—</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 text-blue-600'>▣</span> Open</td>
+                  <td class='px-4 py-3 text-right pr-5'>
+                    <span class='badge findings-badge inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs bg-red-50 text-red-700 border-red-200'
+                      data-item='ID-28'
+                      data-title='Update Login page to have a blue background'
+                      data-agent='Requirement Conflict Detection'
+                      data-severity='High'
+                      data-summary='Top reasons: Insufficient Description, Missing traceability.'
+                      data-other='Change Request Affected Items|Med;Traceability Completeness|Low'>
+                      <span class='robot'>🤖</span>
+                      <span class='font-semibold'>3</span>
+                      <span class='hidden sm:inline'>issues</span>
+                    </span>
+                  </td>
+                </tr>
+
+                <!-- Row 2 -->
+                <tr class='bg-white hover:bg-gray-50'>
+                  <td class='px-4 py-3 text-gray-400'>—</td>
+                  <td class='px-4 py-3'><a href='#' class='font-medium text-emerald-700 hover:underline item-title'>Login Page</a></td>
+                  <td class='px-4 py-3 text-gray-600'>ID-27</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 rounded bg-blue-50 text-blue-700 px-2 py-0.5 text-xs border border-blue-200'>RQ</span></td>
+                  <td class='px-4 py-3'>Serge Versille</td>
+                  <td class='px-4 py-3'>1</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 text-red-600'>●</span> Not approved</td>
+                  <td class='px-4 py-3'>Reopened</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 text-green-600'>■</span> Closed</td>
+                  <td class='px-4 py-3 text-right pr-5'>
+                    <span class='badge findings-badge inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs bg-amber-50 text-amber-700 border-amber-200'
+                      data-item='ID-27'
+                      data-title='Login Page'
+                      data-agent='Requirement Conflict Detection'
+                      data-severity='Med'
+                      data-summary='Summary: Inaccurate Description.'
+                      data-other=''>
+                      <span class='robot'>🤖</span>
+                      <span class='font-semibold'>1</span>
+                      <span class='hidden sm:inline'>issue</span>
+                    </span>
+                  </td>
+                </tr>
+
+                <!-- Row 3 (no findings) -->
+                <tr class='bg-white hover:bg-gray-50'>
+                  <td class='px-4 py-3 text-gray-400'>—</td>
+                  <td class='px-4 py-3'><a href='#' class='font-medium text-emerald-700 hover:underline item-title'>iOS Client (Patient app)</a></td>
+                  <td class='px-4 py-3 text-gray-600'>ID-9</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 rounded bg-green-50 text-green-700 px-2 py-0.5 text-xs border border-green-200'>SW</span></td>
+                  <td class='px-4 py-3'>Serge Versille</td>
+                  <td class='px-4 py-3'>1</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 text-emerald-600'>●</span> Approved</td>
+                  <td class='px-4 py-3'>Approved</td>
+                  <td class='px-4 py-3'><span class='inline-flex items-center gap-1 text-green-600'>■</span> Closed</td>
+                  <td class='px-4 py-3 text-right pr-5 text-gray-300'>—</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Legend -->
+          <div class='px-4 py-3 bg-gray-50 border-t text-xs text-gray-600 flex flex-wrap items-center gap-x-6 gap-y-2'>
+            <div class='flex items-center gap-2'>
+              <span class='inline-flex items-center gap-1 rounded-full bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5'>!
+                <span class='ml-1 font-medium'>High</span>
+              </span>
+              <span class='inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5'>!
+                <span class='ml-1 font-medium'>Medium</span>
+              </span>
+              <span class='inline-flex items-center gap-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5'>i
+                <span class='ml-1 font-medium'>Info</span>
+              </span>
+            </div>
+            <div class='text-gray-500'>Badges show <strong>count</strong> and indicate the <strong>worst severity</strong> from the latest Agent run. Hover or click any badge in the <strong>Findings</strong> column to preview details.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Shared Popover -->
+  <div id='popover' class='elev-2 bg-white border border-gray-200 rounded-xl p-4 w-[360px]'>
+    <div class='arrow'></div>
+    <div class='text-slate-900 font-semibold text-base mb-2'>Latest Agent findings</div>
+    <div id='popover-body' class='text-slate-800 space-y-2 text-sm'></div>
+    <div id='popover-summary' class='mt-3 text-gray-500 text-sm'></div>
+  </div>
+
+  <!-- Drawer + Backdrop -->
+  <div id='backdrop' class='backdrop'></div>
+  <aside id='drawer' class='drawer' aria-hidden='true'>
+    <div class='h-14 flex items-center justify-between px-5 border-b'>
+      <div id='drawerHeaderMeta' class='text-sm text-gray-500'></div>
+      <button id='drawerClose' class='p-2 rounded hover:bg-gray-50' title='Close'>✕</button>
+    </div>
+    <div id='drawerContent' class='h-[calc(100vh-56px)] overflow-y-auto p-5'></div>
+  </aside>
+
+  <script>
+    const pop = document.getElementById('popover');
+    const body = document.getElementById('popover-body');
+    const summary = document.getElementById('popover-summary');
+    let hideTimer = null;
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function renderPopover(ds) {
+      body.innerHTML = '';
+      const primary = document.createElement('div');
+      primary.className = 'flex items-center justify-between';
+      primary.innerHTML = `
+        <span>${ds.agent || 'Agent check'}</span>
+        <span class="inline-flex items-center gap-1 rounded-full ${ds.severity === 'High' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200'} px-2 py-0.5 text-xs">
+          <span class='robot'>🤖</span><span class='font-semibold'>${ds.count}</span> ${ds.count === '1' ? 'issue' : 'issues'}
+        </span>`;
+      body.appendChild(primary);
+
+      if (ds.other) {
+        ds.other.split(';').filter(Boolean).forEach(pair => {
+          const [name, sev] = pair.split('|');
+          const row = document.createElement('button');
+          row.className = 'w-full text-left px-2.5 py-2 rounded-md border border-amber-300/70 bg-amber-50/60 hover:bg-amber-100 hover:border-amber-400 transition flex items-center justify-between cursor-pointer';
+          row.innerHTML = `<span>${name}</span><span class='${sev==='Med'?'text-amber-600':'text-emerald-700'} font-semibold'>${sev}</span>`;
+          row.addEventListener('click', () => { document.getElementById('popover').classList.remove('visible'); openDrawerWithFinding(ds, {name, sev}); });
+          body.appendChild(row);
+        });
+      }
+      summary.textContent = ds.summary || '';
+    }
+
+    function positionPopoverToBadge(badge) {
+      const rect = badge.getBoundingClientRect();
+      const margin = 8;
+      const popWidth = 360;
+      const top = rect.bottom + margin;
+      const left = clamp(rect.left, 10, window.innerWidth - popWidth - 10);
+      pop.style.top = top + 'px';
+      pop.style.left = left + 'px';
+      const arrow = pop.querySelector('.arrow');
+      const arrowLeft = clamp(rect.left - left + 12, 8, popWidth - 24);
+      arrow.style.left = arrowLeft + 'px';
+    }
+
+    function showPopoverFor(badge) {
+      const ds = {
+        item: badge.dataset.item,
+        title: badge.dataset.title,
+        agent: badge.dataset.agent,
+        severity: badge.dataset.severity,
+        summary: badge.dataset.summary,
+        other: badge.dataset.other,
+        count: (badge.textContent.match(/\d+/) || ['1'])[0]
+      };
+      renderPopover(ds);
+      positionPopoverToBadge(badge);
+      pop.classList.add('visible');
+      pop.dataset.forItem = ds.item;
+    }
+
+    function scheduleHide() {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => pop.classList.remove('visible'), 120);
+    }
+
+    // Attach listeners (hover + click)
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.findings-badge').forEach(badge => {
+        badge.addEventListener('mouseenter', () => { clearTimeout(hideTimer); showPopoverFor(badge); });
+        badge.addEventListener('mouseleave', scheduleHide);
+        badge.addEventListener('click', () => { showPopoverFor(badge); });
+      });
+      pop.addEventListener('mouseenter', () => { clearTimeout(hideTimer); });
+      pop.addEventListener('mouseleave', scheduleHide);
+    });
+
+    // Drawer
+    function openDrawerWithFinding(ds, clicked = null) {
+      // Ensure any open popover is closed when the drawer opens
+      const existingPop = document.getElementById('popover');
+      if (existingPop) existingPop.classList.remove('visible');
+      const drawer = document.getElementById('drawer');
+      const backdrop = document.getElementById('backdrop');
+      const content = document.getElementById('drawerContent');
+      const meta = document.getElementById('drawerHeaderMeta');
+
+      meta.textContent = ds.item;
+      content.innerHTML = `
+        <div class='space-y-6'>
+          <header>
+            <div class='text-xs text-gray-500 mb-1'>${ds.item}</div>
+            <h2 class='text-lg font-semibold'>${ds.title}</h2>
+          </header>
+          <section class='space-y-3'>
+            <h3 class='font-semibold text-slate-800'>Finding</h3>
+            <div class='rounded border border-amber-200 bg-amber-50 p-3 flex items-start justify-between'>
+              <div>
+                <div class='text-slate-800 font-medium'>${clicked?.name || ds.agent}</div>
+                <div class='text-slate-600 text-sm mt-1'>${ds.summary}</div>
+              </div>
+              <span class='inline-flex items-center gap-1 rounded-full ${ds.severity==='High'?'bg-red-50 text-red-700 border-red-200':'bg-amber-50 text-amber-700 border-amber-200'} border px-2 py-0.5 text-xs'><span class='robot'>🤖</span>${ds.severity}</span>
+            </div>
+          </section>
+          <section class='space-y-3'>
+            <h3 class='font-semibold text-slate-800'>Recommendation</h3>
+            <div class='rounded border border-emerald-200 bg-emerald-50 p-3 text-slate-800'>
+              Edit all relevant fields of <strong>${ds.item}</strong> to update the description from
+              <em>“The login page of the application shall have a green background.”</em> to
+              <em>“The login page of the application shall have a blue background. The foreground will remain white.”</em>
+            </div>
+          </section>
+          <div class='flex gap-2'>
+            <button id='btnDismiss' class='px-3 py-2 rounded border border-gray-200 hover:bg-gray-50'>Dismiss</button>
+            <button id='btnReview' class='px-3 py-2 rounded bg-emerald-600 text-white'>Review Suggestion</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('btnDismiss').onclick = closeDrawer;
+      document.getElementById('btnReview').onclick = () => openEditForm(ds);
+
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+    }
+
+    function openEditForm(ds) {
+      const content = document.getElementById('drawerContent');
+      content.innerHTML = `
+        <div class='space-y-5'>
+          <header class='flex items-center gap-3'>
+            <h3 class='text-lg font-semibold'>Edit item</h3>
+            <select class='border-gray-300 rounded text-sm'>
+              <option>${ds.item} — ${ds.title}</option>
+            </select>
+          </header>
+          <section class='space-y-3'>
+            <div class='text-xs uppercase text-gray-400'>Type Name</div>
+            <div class='text-sm'>Requirement</div>
+          </section>
+          <section class='space-y-3'>
+            <label class='flex items-center gap-2 text-sm font-medium'>
+              <input type='checkbox' checked class='rounded border-gray-300'>
+              Description
+            </label>
+            <div class='grid grid-cols-2 gap-4'>
+              <div>
+                <div class='text-xs text-gray-500 mb-1'>Original value</div>
+                <div class='border rounded p-3 text-sm leading-relaxed bg-gray-50'>
+                  The login page of the application shall have a <span class='line-through text-red-600'>green</span> background.
+                </div>
+              </div>
+              <div>
+                <div class='text-xs text-gray-500 mb-1'>New value</div>
+                <div class='border rounded p-3 text-sm leading-relaxed bg-white'>
+                  The login page of the application shall have a <span class='bg-green-100 text-green-800 rounded px-1'>blue</span> background. The foreground will remain white.
+                </div>
+              </div>
+            </div>
+            <div class='text-xs text-gray-500 mt-2'>
+              <strong>Changes</strong>: The login page of the application shall have a <span class='line-through text-red-600'>green</span><span class='bg-green-100 text-green-800 rounded px-1'> blue</span> background. <span class='bg-green-100 text-green-800 rounded px-1'>The foreground will remain white.</span>
+            </div>
+          </section>
+          <div class='flex gap-2 pt-2'>
+            <button id='btnCancelEdit' class='px-3 py-2 rounded border border-gray-200 hover:bg-gray-50'>Cancel</button>
+            <button id='btnSaveEdit' class='px-3 py-2 rounded bg-emerald-600 text-white'>Save changes</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('btnCancelEdit').onclick = () => openDrawerWithFinding(ds);
+      document.getElementById('btnSaveEdit').onclick = () => { closeDrawer(); alert('Changes saved (mock).'); };
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('backdrop').classList.remove('open');
+    }
+    document.getElementById('drawerClose').onclick = closeDrawer;
+    document.getElementById('backdrop').onclick = closeDrawer;
+  </script>
+</body>
+</html>
